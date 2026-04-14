@@ -44,6 +44,10 @@ import RepairFormPage from '../pages/repairs/RepairFormPage';
 import AddonsPage from '../pages/addons/AddonsPage';
 import AddonFormPage from '../pages/addons/AddonFormPage';
 
+/* ── Blog ───────────────────────────────────────────────────── */
+import BlogsPage from '../pages/blog/BlogsPage';
+import BlogFormPage from '../pages/blog/BlogFormPage';
+
 /* ── Forms ──────────────────────────────────────────────────── */
 import NewsletterPage from '../pages/forms/NewsletterPage';
 import ContactPage    from '../pages/forms/ContactPage';
@@ -117,6 +121,11 @@ export default function AppRoutes() {
         <Route path="/addons"               element={<AddonsPage />} />
         <Route path="/addons/new"           element={<AddonFormPage />} />
         <Route path="/addons/:addonId/edit" element={<AddonFormPage />} />
+
+        {/* Blog */}
+        <Route path="/blog"               element={<BlogsPage />} />
+        <Route path="/blog/new"            element={<BlogFormPage />} />
+        <Route path="/blog/:postId/edit"   element={<BlogFormPage />} />
 
         {/* Forms */}
         <Route path="/forms/newsletter" element={<NewsletterPage />} />

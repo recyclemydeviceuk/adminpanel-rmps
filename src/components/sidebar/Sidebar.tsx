@@ -15,6 +15,7 @@ import {
   Mail,
   MessageSquare,
   ShieldCheck,
+  FileText,
 } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 import SidebarGroup from './SidebarGroup';
@@ -88,6 +89,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <SidebarGroup label="Services">
             <SidebarItem to="/repairs"  icon={Wrench}  label="Repairs"  onClick={onClose} />
             <SidebarItem to="/addons"   icon={Package} label="Add-ons"  onClick={onClose} />
+          </SidebarGroup>
+
+          <SidebarGroup label="Content">
+            <SidebarItem to="/blog" icon={FileText} label="Blog" onClick={onClose} />
           </SidebarGroup>
 
           <SidebarGroup label="Forms">
