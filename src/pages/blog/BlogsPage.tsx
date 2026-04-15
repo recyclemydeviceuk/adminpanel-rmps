@@ -42,7 +42,6 @@ export default function BlogsPage() {
   useEffect(() => { setPage(1); }, [search, tab]);
 
   const publishedCount = posts.filter(p => p.isPublished).length;
-  const draftCount = posts.filter(p => !p.isPublished).length;
 
   const handleDelete = async (post: BlogPost) => {
     if (!confirm(`Delete "${post.title}"?`)) return;
