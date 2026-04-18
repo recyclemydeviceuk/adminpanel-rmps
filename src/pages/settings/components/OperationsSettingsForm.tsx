@@ -23,7 +23,7 @@ const TOGGLES: ToggleDef[] = [
   { key: 'maintenanceMode',    label: 'Maintenance Mode',      description: 'Temporarily disable the website for customers.',              icon: Wrench,   iconBg: 'bg-red-50',    iconColor: 'text-red-600',    dangerOn: true },
   { key: 'acceptNewBookings',  label: 'Accept New Bookings',   description: 'Allow customers to book repairs online.',                      icon: Calendar, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
   { key: 'sameDayRepairs',     label: 'Same-Day Repairs',      description: 'Show same-day availability to customers during checkout.',     icon: Clock,    iconBg: 'bg-blue-50',   iconColor: 'text-blue-600'    },
-  { key: 'collectionDelivery', label: 'Collection & Delivery', description: 'Offer mail-in / collection service as an option at checkout.', icon: Truck,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-600'   },
+  { key: 'collectionDelivery', label: 'Collection & Delivery (Preston only)', description: 'Offer in-person collection & drop-off at checkout. Restricted to PR postcodes — customers outside Preston will be blocked from selecting it.', icon: Truck,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-600'   },
 ];
 
 const timeCls = "rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-2.5 py-2 text-[13px] text-[#202124] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all";
