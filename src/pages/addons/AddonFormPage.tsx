@@ -1,11 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Package, Upload, X, CheckCircle2, PoundSterling } from 'lucide-react';
+import { ArrowLeft, Package, Upload, X, CheckCircle2, PoundSterling, Palette, Plus } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
 import { useToast } from '../../context/ToastContext';
 import { getAddon, createAddon, updateAddon, getAddons } from '../../lib/addons';
 import { uploadImage } from '../../lib/upload';
-import type { AddonCategory } from '../../types/addon';
+import type { AddonCategory, AddonColorOption } from '../../types/addon';
+
+// Sensible starter palette for phone cases etc.
+const COLOR_PRESETS: { name: string; hex: string }[] = [
+  { name: 'Midnight Black', hex: '#111827' },
+  { name: 'Pearl White',    hex: '#f8fafc' },
+  { name: 'Navy Blue',      hex: '#1e3a8a' },
+  { name: 'Forest Green',   hex: '#166534' },
+  { name: 'Rose Pink',      hex: '#f472b6' },
+  { name: 'Cherry Red',     hex: '#dc2626' },
+];
 
 export default function AddonFormPage() {
   const navigate = useNavigate();
@@ -25,6 +35,9 @@ export default function AddonFormPage() {
   const [isActive, setIsActive] = useState(true);
   const [isRequired, setIsRequired] = useState(false);
   const [sortOrder, setSortOrder] = useState(1);
+  const [colors, setColors] = useState<AddonColorOption[]>([]);
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorHex, setNewColorHex]   = useState('#000000');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -39,6 +52,7 @@ export default function AddonFormPage() {
         setPrice(String(a.price)); setIsActive(a.isActive);
         setIsRequired(!!a.isRequired); setSortOrder(a.sortOrder);
         if ((a as any).imageUrl) { setImageUrl((a as any).imageUrl); setImagePreview((a as any).imageUrl); }
+        if (a.colors && Array.isArray(a.colors)) setColors(a.colors);
       }
     }).finally(() => setLoading(false));
   }, [addonId]);
@@ -75,6 +89,7 @@ export default function AddonFormPage() {
         name: name.trim(), description: description.trim(),
         category: 'other' as AddonCategory,
         price: parseFloat(price), isActive, isRequired, sortOrder,
+        colors,
         ...(imageUrl ? { imageUrl } : {}),
       };
       if (isEdit && addonId) {
@@ -206,6 +221,133 @@ export default function AddonFormPage() {
                   <p className="text-[13px] font-semibold text-[#202124]">Drop image here or <span className="text-pink-600">browse</span></p>
                   <p className="text-[11px] text-[#9aa0a6] mt-1">PNG, JPG, WebP · max 5 MB</p>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Colour Options */}
+        <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm overflow-hidden">
+          <div className="border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-3.5 flex items-center gap-2">
+            <Palette size={13} className="text-pink-500" />
+            <span className="text-[13px] font-bold text-[#202124]">Colour Options</span>
+            <span className="ml-2 text-[11px] text-[#9aa0a6]">Optional — for cases, covers, etc.</span>
+          </div>
+          <div className="p-6 space-y-5">
+            <p className="text-[12px] leading-[1.6] text-[#5f6368]">
+              Add colours if this add-on comes in multiple variants. Customers will be required to pick one at checkout. Leave empty for colour-less items (screen protectors, warranties, etc).
+            </p>
+
+            {/* Preset quick-add */}
+            {colors.length === 0 && (
+              <div>
+                <label className={lc}>Quick start — tap to add common colours</label>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_PRESETS.map(p => (
+                    <button
+                      key={p.hex}
+                      type="button"
+                      onClick={() => setColors(c => [...c, { name: p.name, hex: p.hex }])}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#e8eaed] bg-white px-3 py-1.5 text-[12px] font-medium text-[#202124] hover:border-pink-400 hover:bg-pink-50 transition-all"
+                    >
+                      <span className="h-4 w-4 rounded-full border border-black/10 shadow-inner" style={{ background: p.hex }} />
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Existing colours */}
+            {colors.length > 0 && (
+              <div className="space-y-2">
+                {colors.map((c, i) => (
+                  <div
+                    key={`${c.hex}-${i}`}
+                    className="flex items-center gap-3 rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-3 py-2"
+                  >
+                    <span
+                      className="h-8 w-8 flex-shrink-0 rounded-lg border border-black/10 shadow-inner"
+                      style={{ background: c.hex }}
+                    />
+                    <input
+                      type="color"
+                      value={c.hex}
+                      onChange={e => {
+                        const hex = e.target.value;
+                        setColors(prev => prev.map((x, idx) => idx === i ? { ...x, hex } : x));
+                      }}
+                      className="h-8 w-10 rounded border border-[#e8eaed] bg-white cursor-pointer"
+                      aria-label="Pick colour"
+                    />
+                    <input
+                      value={c.name}
+                      onChange={e => {
+                        const n = e.target.value;
+                        setColors(prev => prev.map((x, idx) => idx === i ? { ...x, name: n } : x));
+                      }}
+                      placeholder="Colour name"
+                      className="flex-1 rounded-lg border border-[#e8eaed] bg-white px-3 py-2 text-[13px] text-[#202124] placeholder:text-[#c4c9d0] focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setColors(prev => prev.filter((_, idx) => idx !== i))}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9aa0a6] hover:bg-red-50 hover:text-red-600 transition-colors"
+                      aria-label="Remove colour"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Custom add */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-dashed border-[#e8eaed]">
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={newColorHex}
+                  onChange={e => setNewColorHex(e.target.value)}
+                  className="h-10 w-12 rounded-lg border border-[#e8eaed] bg-white cursor-pointer"
+                  aria-label="Pick new colour"
+                />
+                <span className="text-[11px] font-mono text-[#9aa0a6] uppercase">{newColorHex}</span>
+              </div>
+              <input
+                value={newColorName}
+                onChange={e => setNewColorName(e.target.value)}
+                placeholder="Colour name (e.g. Sunset Orange)"
+                className={ic}
+              />
+              <button
+                type="button"
+                disabled={!newColorName.trim()}
+                onClick={() => {
+                  if (!newColorName.trim()) return;
+                  setColors(c => [...c, { name: newColorName.trim(), hex: newColorHex }]);
+                  setNewColorName(''); setNewColorHex('#000000');
+                }}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-5 py-2.5 text-[12px] font-bold text-white shadow-sm hover:from-pink-600 hover:to-rose-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+              >
+                <Plus size={13} />
+                Add colour
+              </button>
+            </div>
+
+            {colors.length > 0 && (
+              <div className="flex items-center justify-between text-[11px] text-[#5f6368]">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 size={12} className="text-emerald-500" />
+                  {colors.length} colour{colors.length !== 1 ? 's' : ''} — customers will pick one at checkout
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setColors([])}
+                  className="text-[11px] font-semibold text-red-500 hover:text-red-600"
+                >
+                  Clear all
+                </button>
               </div>
             )}
           </div>
