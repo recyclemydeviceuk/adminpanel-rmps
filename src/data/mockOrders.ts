@@ -7,7 +7,7 @@ export const MOCK_ORDERS: Order[] = [
     customerEmail: 'james.wilson@email.com', customerPhone: '07700 900123',
     device: 'iPhone 15 Pro', brand: 'Apple', model: 'iPhone 15 Pro',
     repairType: 'Front Screen',
-    items: [{ id: 'item-1', repairType: 'Front Screen', deviceModel: 'iPhone 15 Pro', description: 'OLED screen replacement with genuine parts', quantity: 1, unitPrice: 149.99, totalPrice: 149.99 }],
+    items: [{ id: 'item-1', repairType: 'Front Screen', deviceModel: 'iPhone 15 Pro', description: 'OLED screen replacement with high-quality parts', quantity: 1, unitPrice: 149.99, totalPrice: 149.99 }],
     subtotal: 149.99, discount: 0, tax: 0, total: 149.99,
     status: 'paid', paymentMethod: 'paypal', paymentStatus: 'paid',
     createdAt: '2024-03-15T10:23:00Z', updatedAt: '2024-03-15T10:25:00Z',
