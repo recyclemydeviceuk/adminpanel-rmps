@@ -12,7 +12,10 @@ import type { Order, OrderStatus } from '../../types/order';
 
 const PAGE_SIZE = 12;
 
-const STATUS_OPTS: OrderStatus[] = ['pending','paid','processing','completed','failed','refunded','cancelled'];
+// Statuses that admin is allowed to set manually.
+// `pending` / `paid` are derived from the PayPal payment lifecycle
+// (unpaid → pending, paid once webhook confirms) and are read-only.
+const ADMIN_STATUS_OPTS: OrderStatus[] = ['processing','completed','failed','refunded','cancelled'];
 
 const STATUS_STAT_CONFIG = [
   {
@@ -218,8 +221,8 @@ export default function OrdersPage() {
         </Button>
       </div>
 
-      {/* Status metric cards — all 7 statuses */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
+      {/* Status metric cards — 7 statuses, responsive grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {STATUS_STAT_CONFIG.map(s => {
           const count = orders.filter(o => o.status === s.key).length;
           const pct = orders.length ? Math.round((count / orders.length) * 100) : 0;
@@ -238,15 +241,15 @@ export default function OrdersPage() {
               <div className={`h-1 w-full bg-gradient-to-r ${s.gradient}`} />
 
               {/* Decorative circle background */}
-              <div className={`absolute -right-4 -top-4 h-20 w-20 rounded-full bg-gradient-to-br ${s.gradient} opacity-[0.07]`} />
+              <div className={`absolute -right-4 -top-4 h-16 w-16 rounded-full bg-gradient-to-br ${s.gradient} opacity-[0.07]`} />
 
-              <div className="p-5">
-                {/* Icon + label row */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${s.gradient} shadow-sm`}>
-                    <s.icon size={18} className="text-white" />
+              <div className="p-3.5">
+                {/* Icon + pct row */}
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${s.gradient} shadow-sm`}>
+                    <s.icon size={15} className="text-white" />
                   </div>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                     isActive ? `${s.iconBg} ${s.textColor}` : 'bg-gray-100 text-[#9aa0a6]'
                   }`}>
                     {pct}%
@@ -254,17 +257,17 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Count */}
-                <p className="text-[32px] font-black text-[#202124] leading-none tracking-tight">{count}</p>
-                <p className={`text-[12px] font-semibold mt-1 ${isActive ? s.textColor : 'text-[#5f6368]'}`}>{s.label}</p>
+                <p className="text-[24px] font-black text-[#202124] leading-none tracking-tight">{count}</p>
+                <p className={`text-[11px] font-semibold mt-0.5 ${isActive ? s.textColor : 'text-[#5f6368]'}`}>{s.label}</p>
 
                 {/* Progress bar */}
-                <div className="mt-4 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                <div className="mt-2.5 h-1 w-full rounded-full bg-gray-100 overflow-hidden">
                   <div
                     className={`h-full rounded-full bg-gradient-to-r ${s.gradient} transition-all duration-500`}
                     style={{ width: `${Math.max(pct, 3)}%` }}
                   />
                 </div>
-                <p className="mt-1.5 text-[10px] text-[#9aa0a6]">{count} of {orders.length} orders</p>
+                <p className="mt-1 text-[9px] text-[#9aa0a6]">{count} of {orders.length}</p>
               </div>
             </button>
           );
@@ -445,12 +448,31 @@ export default function OrdersPage() {
                   {/* Total */}
                   <span className="text-[13px] font-bold text-[#202124]">{formatCurrency(row.total)}</span>
 
-                  {/* Status */}
+                  {/* Status — editable only once the order is paid */}
                   <div onClick={e => e.stopPropagation()}>
-                    <select value={row.status} onChange={e => handleStatusChange(e, row.id)}
-                      className="w-full rounded-lg border border-[#e8eaed] bg-white px-2 py-1.5 text-[11px] font-medium text-[#5f6368] focus:outline-none focus:ring-1 focus:ring-red-600 cursor-pointer">
-                      {STATUS_OPTS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                    </select>
+                    {row.paymentStatus !== 'paid' ? (
+                      // Unpaid → status is pinned to "Pending" by the payment lifecycle.
+                      // Show a read-only chip so admins can't change it.
+                      <span
+                        title="Order is unpaid — status is locked until payment is confirmed."
+                        className="inline-flex w-full items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-700"
+                      >
+                        <Lock size={9} className="opacity-60" />
+                        {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                      </span>
+                    ) : ADMIN_STATUS_OPTS.includes(row.status as OrderStatus) ? (
+                      <select value={row.status} onChange={e => handleStatusChange(e, row.id)}
+                        className="w-full rounded-lg border border-[#e8eaed] bg-white px-2 py-1.5 text-[11px] font-medium text-[#5f6368] focus:outline-none focus:ring-1 focus:ring-red-600 cursor-pointer">
+                        {ADMIN_STATUS_OPTS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                      </select>
+                    ) : (
+                      // Paid but still showing 'paid' → needs to be advanced manually to 'processing'
+                      <select value="processing" onChange={e => handleStatusChange(e, row.id)}
+                        className="w-full rounded-lg border border-green-200 bg-green-50 px-2 py-1.5 text-[11px] font-semibold text-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 cursor-pointer">
+                        <option value={row.status} disabled>Paid — choose next →</option>
+                        {ADMIN_STATUS_OPTS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                      </select>
+                    )}
                   </div>
 
                   {/* Payment — read-only, system-managed */}
