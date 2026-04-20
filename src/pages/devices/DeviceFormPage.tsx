@@ -20,6 +20,7 @@ export default function DeviceFormPage() {
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [isActive, setIsActive] = useState(true);
@@ -31,6 +32,7 @@ export default function DeviceFormPage() {
     getDeviceTypeById(deviceId).then(device => {
       if (device) {
         setName(device.name); setSlug(device.slug);
+        setSubtitle(device.subtitle ?? '');
         setImageUrl(device.imageUrl ?? '');
         setImagePreview(device.imageUrl ?? '');
         setIsActive(device.isActive);
@@ -68,10 +70,10 @@ export default function DeviceFormPage() {
     try {
       if (isEdit && deviceId) {
         // Never send slug on update — it's immutable after creation
-        await updateDeviceType(deviceId, { name: name.trim(), imageUrl, isActive });
+        await updateDeviceType(deviceId, { name: name.trim(), subtitle: subtitle.trim(), imageUrl, isActive });
         success('Device updated', `${name} has been saved.`);
       } else {
-        await createDeviceType({ name: name.trim(), slug: slug.trim(), imageUrl, isActive });
+        await createDeviceType({ name: name.trim(), slug: slug.trim(), subtitle: subtitle.trim(), imageUrl, isActive });
         success('Device created', `${name} has been added.`);
       }
       navigate('/devices');
@@ -148,6 +150,22 @@ export default function DeviceFormPage() {
                     : 'Auto-generated from name · URL-friendly identifier'}
                 </p>
               </div>
+            </div>
+
+            {/* Subtitle */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#5f6368] mb-2">
+                Subtitle
+                <span className="ml-1.5 text-[10px] font-medium normal-case tracking-normal text-[#9aa0a6]">Optional</span>
+              </label>
+              <input
+                value={subtitle}
+                onChange={e => setSubtitle(e.target.value)}
+                placeholder="e.g. All iPhone models"
+                maxLength={200}
+                className="w-full rounded-xl border border-[#e8eaed] bg-white px-4 py-3 text-[13px] text-[#202124] placeholder:text-[#c4c9d0] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              />
+              <p className="mt-1.5 text-[10px] text-[#9aa0a6]">Short helper line shown under the device name on the homepage + Book-a-Repair page.</p>
             </div>
           </div>
         </div>

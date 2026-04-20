@@ -3,6 +3,7 @@ export interface DeviceType {
   id: string;
   name: string;
   slug: string;
+  subtitle?: string;
   imageUrl?: string;
   brandCount: number;
   isActive: boolean;
