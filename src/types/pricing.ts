@@ -7,9 +7,9 @@ export type RepairCategory =
   | 'speaker'
   | 'other';
 
-export type WarrantyOption = '30 Days' | '90 Days' | '6 Months' | '1 Year' | 'Lifetime';
+export type WarrantyOption = '30 Days' | '90 Days' | '6 Months' | '12 Months' | '1 Year' | 'Lifetime';
 
-export const WARRANTY_OPTIONS: WarrantyOption[] = ['30 Days', '90 Days', '6 Months', '1 Year', 'Lifetime'];
+export const WARRANTY_OPTIONS: WarrantyOption[] = ['30 Days', '90 Days', '6 Months', '12 Months', '1 Year', 'Lifetime'];
 
 export interface RepairType {
   id: string;
