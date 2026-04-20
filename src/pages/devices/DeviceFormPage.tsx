@@ -4,6 +4,7 @@ import { ArrowLeft, Smartphone, Upload, X, CheckCircle2 } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
 import { useToast } from '../../context/ToastContext';
 import { getDeviceTypeById, createDeviceType, updateDeviceType } from '../../lib/devices';
+import { uploadImage } from '../../lib/upload';
 
 function toSlug(name: string) {
   return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -18,6 +19,7 @@ export default function DeviceFormPage() {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [subtitle, setSubtitle] = useState('');
@@ -45,15 +47,27 @@ export default function DeviceFormPage() {
     if (!isEdit) setSlug(toSlug(v));
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
+
+    // Show instant local preview while uploading to S3
     const reader = new FileReader();
-    reader.onload = e => {
-      const result = e.target?.result as string;
-      setImagePreview(result);
-      setImageUrl(result);
-    };
+    reader.onload = e => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file, 'devices');
+      setImageUrl(url);
+      setImagePreview(url); // replace local preview with real S3 URL
+      success('Image uploaded', 'Click Save to apply changes.');
+    } catch {
+      toastError('Image upload failed. Please try again.');
+      setImagePreview(imageUrl); // revert to previous if upload fails
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -184,25 +198,38 @@ export default function DeviceFormPage() {
               <div className="flex items-center gap-5">
                 <div className="relative h-28 w-28 flex-shrink-0 rounded-2xl border-2 border-[#e8eaed] bg-gray-50 overflow-hidden shadow-sm">
                   <img src={imagePreview} alt="Preview" className="h-full w-full object-contain p-3" />
-                  <button type="button" onClick={() => { setImagePreview(''); setImageUrl(''); }}
-                    className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600 transition-colors">
-                    <X size={11} />
-                  </button>
+                  {uploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
+                      <Spinner size="sm" />
+                    </div>
+                  )}
+                  {!uploading && (
+                    <button type="button" onClick={() => { setImagePreview(''); setImageUrl(''); }}
+                      className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600 transition-colors">
+                      <X size={11} />
+                    </button>
+                  )}
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <CheckCircle2 size={14} className="text-emerald-500" />
-                    <span className="text-[13px] font-semibold text-emerald-700">Image uploaded</span>
-                  </div>
-                  <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="text-[12px] font-semibold text-red-600 hover:text-red-700 transition-colors">
-                    Replace image
-                  </button>
+                  {uploading ? (
+                    <p className="text-[13px] text-[#9aa0a6] mb-2">Uploading to S3…</p>
+                  ) : (
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <CheckCircle2 size={14} className="text-emerald-500" />
+                      <span className="text-[13px] font-semibold text-emerald-700">Image uploaded</span>
+                    </div>
+                  )}
+                  {!uploading && (
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                      className="text-[12px] font-semibold text-red-600 hover:text-red-700 transition-colors">
+                      Replace image
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
               <div
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => !uploading && fileInputRef.current?.click()}
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
@@ -241,10 +268,10 @@ export default function DeviceFormPage() {
             className="rounded-xl border border-[#e8eaed] bg-white px-5 py-2.5 text-[13px] font-semibold text-[#5f6368] hover:bg-gray-50 transition-colors">
             Cancel
           </button>
-          <button type="submit" disabled={saving || !name.trim()}
+          <button type="submit" disabled={saving || uploading || !name.trim()}
             className="flex items-center gap-2 rounded-xl bg-red-600 px-6 py-2.5 text-[13px] font-bold text-white shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-            {saving ? <Spinner size="sm" /> : null}
-            {isEdit ? 'Save Changes' : 'Create Device'}
+            {(saving || uploading) ? <Spinner size="sm" /> : null}
+            {uploading ? 'Uploading image…' : saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Device'}
           </button>
         </div>
       </form>
