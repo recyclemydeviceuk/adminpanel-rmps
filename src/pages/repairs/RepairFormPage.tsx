@@ -6,7 +6,6 @@ import { useToast } from '../../context/ToastContext';
 import { getRepairTypeById, createRepairType, updateRepairType } from '../../lib/pricing';
 import { uploadImage } from '../../lib/upload';
 import type { RepairCategory, WarrantyOption } from '../../types/pricing';
-import { WARRANTY_OPTIONS } from '../../types/pricing';
 
 function categoryFromName(name: string): RepairCategory {
   const n = name.toLowerCase();
@@ -35,7 +34,10 @@ export default function RepairFormPage() {
   const [name, setName]           = useState('');
   const [slug, setSlug]           = useState('');
   const [description, setDescription] = useState('');
-  const [warranty, setWarranty]   = useState<WarrantyOption | ''>('');
+  // Every repair on the site now carries a single standard 12-month
+  // warranty — we still keep the field in state so the API payload is
+  // unchanged, but admin can't pick anything else.
+  const [warranty, setWarranty]   = useState<WarrantyOption>('12 Months');
   const [imageUrl, setImageUrl]   = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [imgDragOver, setImgDragOver]   = useState(false);
@@ -50,7 +52,8 @@ export default function RepairFormPage() {
         setName(rt.name);
         setSlug(rt.slug);
         setDescription(rt.description ?? '');
-        setWarranty((rt.warranty as WarrantyOption | '') ?? '');
+        // All repairs now carry a 12-month warranty regardless of stored value.
+        setWarranty('12 Months');
         setImageUrl(rt.imageUrl ?? '');
         setImagePreview(rt.imageUrl ?? '');
         setIsActive(rt.isActive);
@@ -188,34 +191,20 @@ export default function RepairFormPage() {
               />
             </div>
 
-            {/* Warranty Duration */}
+            {/* Warranty Duration — fixed site-wide */}
             <div className="rounded-xl border border-[#e8eaed] bg-[#fafbfc] p-4">
               <div className="flex items-center gap-2 mb-3">
                 <ShieldCheck size={15} className="text-orange-500" />
                 <span className={lc + ' mb-0'}>Warranty Duration</span>
-                <span className="text-[10px] text-[#9aa0a6]">auto-syncs to all pricing rules &amp; the website</span>
+                <span className="text-[10px] text-[#9aa0a6]">fixed for every repair on the site</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {(['', ...WARRANTY_OPTIONS] as const).map(opt => (
-                  <button
-                    key={opt || 'none'}
-                    type="button"
-                    onClick={() => setWarranty(opt as WarrantyOption | '')}
-                    className={`rounded-xl border px-4 py-2 text-[12px] font-semibold transition-all whitespace-nowrap ${
-                      warranty === opt
-                        ? 'border-orange-500 bg-orange-500 text-white shadow-sm'
-                        : 'border-[#e8eaed] bg-white text-[#5f6368] hover:border-orange-300 hover:text-orange-600'
-                    }`}
-                  >
-                    {opt || 'None'}
-                  </button>
-                ))}
+              <div className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5">
+                <ShieldCheck size={15} className="text-orange-600" />
+                <span className="text-[13px] font-bold text-orange-700">12 Months</span>
               </div>
-              {warranty && (
-                <p className="mt-2.5 text-[11px] text-emerald-600 font-medium flex items-center gap-1">
-                  <ShieldCheck size={11} /> Saving will update all pricing rules for this repair type to <strong>{warranty}</strong>
-                </p>
-              )}
+              <p className="mt-2.5 text-[11px] text-[#5f6368] leading-relaxed">
+                Every repair is covered by our standard 12-month warranty. This is applied automatically — no other options are supported.
+              </p>
             </div>
           </div>
         </div>

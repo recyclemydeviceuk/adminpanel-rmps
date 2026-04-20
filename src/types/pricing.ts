@@ -7,9 +7,12 @@ export type RepairCategory =
   | 'speaker'
   | 'other';
 
-export type WarrantyOption = '30 Days' | '90 Days' | '6 Months' | '12 Months' | '1 Year' | 'Lifetime';
+// Every repair on the site carries a single standard warranty —
+// kept as a 1-item list rather than a string so downstream code
+// (dropdowns, pills, type guards) continues to work unchanged.
+export type WarrantyOption = '12 Months';
 
-export const WARRANTY_OPTIONS: WarrantyOption[] = ['30 Days', '90 Days', '6 Months', '12 Months', '1 Year', 'Lifetime'];
+export const WARRANTY_OPTIONS: WarrantyOption[] = ['12 Months'];
 
 export interface RepairType {
   id: string;
