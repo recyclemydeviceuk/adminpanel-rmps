@@ -67,7 +67,8 @@ export default function DeviceFormPage() {
     setSaving(true);
     try {
       if (isEdit && deviceId) {
-        await updateDeviceType(deviceId, { name: name.trim(), slug: slug.trim(), imageUrl, isActive });
+        // Never send slug on update — it's immutable after creation
+        await updateDeviceType(deviceId, { name: name.trim(), imageUrl, isActive });
         success('Device updated', `${name} has been saved.`);
       } else {
         await createDeviceType({ name: name.trim(), slug: slug.trim(), imageUrl, isActive });
@@ -125,10 +126,27 @@ export default function DeviceFormPage() {
                   className="w-full rounded-xl border border-[#e8eaed] bg-white px-4 py-3 text-[13px] text-[#202124] placeholder:text-[#c4c9d0] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#5f6368] mb-2">Slug <span className="text-red-500">*</span></label>
-                <input value={slug} onChange={e => setSlug(e.target.value)} placeholder="e.g. phone" required
-                  className="w-full rounded-xl border border-[#e8eaed] bg-white px-4 py-3 text-[13px] text-[#202124] font-mono placeholder:text-[#c4c9d0] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all" />
-                <p className="mt-1.5 text-[10px] text-[#9aa0a6]">Auto-generated from name · URL-friendly identifier</p>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#5f6368] mb-2">
+                  Slug <span className="text-red-500">*</span>
+                  {isEdit && <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wide">Locked</span>}
+                </label>
+                <input
+                  value={slug}
+                  onChange={e => !isEdit && setSlug(e.target.value)}
+                  placeholder="e.g. phone"
+                  required
+                  readOnly={isEdit}
+                  className={`w-full rounded-xl border px-4 py-3 text-[13px] font-mono placeholder:text-[#c4c9d0] focus:outline-none transition-all ${
+                    isEdit
+                      ? 'border-[#e8eaed] bg-[#f8fafc] text-[#9aa0a6] cursor-not-allowed'
+                      : 'border-[#e8eaed] bg-white text-[#202124] focus:ring-2 focus:ring-red-500 focus:border-transparent'
+                  }`}
+                />
+                <p className="mt-1.5 text-[10px] text-[#9aa0a6]">
+                  {isEdit
+                    ? 'Slug is immutable after creation — changing it would break customer URLs and the Book-a-Repair flow.'
+                    : 'Auto-generated from name · URL-friendly identifier'}
+                </p>
               </div>
             </div>
           </div>
