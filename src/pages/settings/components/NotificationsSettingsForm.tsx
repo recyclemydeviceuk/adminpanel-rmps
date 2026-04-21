@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Mail, Bell, ShoppingBag, Wrench, ShieldCheck, MessageSquare, Newspaper, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Bell, ShoppingBag, Wrench, ShieldCheck, MessageSquare, Newspaper, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSettings, updateNotificationsSettings } from '../../../lib/settings';
 import type { Settings } from '../../../lib/settings';
 import { useToast } from '../../../hooks/useToast';
 
 interface ToggleDef {
-  key:         keyof Omit<Settings['notifications'], 'adminNotifyEmail'>;
+  key:         keyof Settings['notifications'];
   label:       string;
   description: string;
   icon:        React.ElementType;
@@ -21,15 +21,12 @@ const TOGGLES: ToggleDef[] = [
   { key: 'emailOnNewsletter',    label: 'Newsletter Sign-Up',  description: 'Send email when someone subscribes to the newsletter', icon: Newspaper,   iconColor: 'text-teal-600',    iconBg: 'bg-teal-50'    },
 ];
 
-const inputCls = "w-full rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-3.5 py-2.5 text-[13px] text-[#202124] placeholder:text-[#c5c9ce] focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:bg-white transition-all";
-
 const EMPTY_NOTIF: Settings['notifications'] = {
   emailOnNewOrder:      true,
   emailOnOrderComplete: true,
   emailOnWarrantyClaim: true,
   emailOnContactForm:   true,
   emailOnNewsletter:    false,
-  adminNotifyEmail:     '',
 };
 
 export default function NotificationsSettingsForm() {
@@ -49,13 +46,12 @@ export default function NotificationsSettingsForm() {
         emailOnWarrantyClaim: s.notifications.emailOnWarrantyClaim ?? true,
         emailOnContactForm:   s.notifications.emailOnContactForm   ?? true,
         emailOnNewsletter:    s.notifications.emailOnNewsletter    ?? false,
-        adminNotifyEmail:     s.notifications.adminNotifyEmail     ?? '',
       }))
       .catch(() => setFetchError('Failed to load settings. Check your connection.'))
       .finally(() => setLoading(false));
   }, []);
 
-  const toggleKey = (key: keyof Omit<Settings['notifications'], 'adminNotifyEmail'>) =>
+  const toggleKey = (key: keyof Settings['notifications']) =>
     setNotif(p => ({ ...p, [key]: !p[key] }));
 
   const activeCount = TOGGLES.filter(t => notif[t.key]).length;
@@ -71,7 +67,6 @@ export default function NotificationsSettingsForm() {
         emailOnWarrantyClaim: updated.notifications.emailOnWarrantyClaim ?? true,
         emailOnContactForm:   updated.notifications.emailOnContactForm   ?? true,
         emailOnNewsletter:    updated.notifications.emailOnNewsletter    ?? false,
-        adminNotifyEmail:     updated.notifications.adminNotifyEmail     ?? '',
       });
       success('Notification settings saved');
     } catch (err: any) {
@@ -107,26 +102,6 @@ export default function NotificationsSettingsForm() {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-
-      {/* Notification email */}
-      <div className="rounded-2xl border border-[#e8eaed] overflow-hidden">
-        <div className="bg-gradient-to-r from-violet-50 to-purple-50 px-5 py-3 border-b border-[#e8eaed]">
-          <p className="text-[12px] font-bold text-[#5f6368] uppercase tracking-widest">Notification Destination</p>
-        </div>
-        <div className="p-5">
-          <label className="mb-1.5 flex items-center gap-1.5 text-[12px] font-bold text-[#5f6368] uppercase tracking-wide">
-            <Mail size={11} /> Admin Notification Email
-          </label>
-          <input
-            type="email"
-            value={notif.adminNotifyEmail}
-            onChange={e => setNotif(p => ({ ...p, adminNotifyEmail: e.target.value }))}
-            className={`${inputCls} max-w-sm`}
-            placeholder="admin@repairmyphonescreen.co.uk"
-          />
-          <p className="mt-1.5 text-[11px] text-[#9aa0a6]">All admin notifications will be sent to this address.</p>
-        </div>
-      </div>
 
       {/* Toggle events */}
       <div className="rounded-2xl border border-[#e8eaed] overflow-hidden">

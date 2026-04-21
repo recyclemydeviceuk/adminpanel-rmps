@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Wrench, Truck, Timer, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Wrench, Truck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSettings, updateOperationsSettings } from '../../../lib/settings';
-import type { Settings, BusinessHour } from '../../../lib/settings';
+import type { Settings } from '../../../lib/settings';
 import { useToast } from '../../../hooks/useToast';
-
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DEFAULT_HOURS: BusinessHour[] = DAYS.map((day, i) => ({
-  day, open: i < 5, from: '09:00', to: '18:00',
-}));
 
 interface ToggleDef {
   key:         keyof Settings['operations'];
@@ -24,15 +19,10 @@ const TOGGLES: ToggleDef[] = [
   { key: 'collectionDelivery', label: 'Collection & Delivery (Preston only)', description: 'Offer in-person collection & drop-off at checkout. Restricted to PR postcodes — customers outside Preston will be blocked from selecting it.', icon: Truck,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-600'   },
 ];
 
-const timeCls = "rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-2.5 py-2 text-[13px] text-[#202124] focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all";
-const inputCls = "w-full rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-3.5 py-2.5 text-[13px] text-[#202124] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all";
-
 const EMPTY_OPS: Settings['operations'] = {
   maintenanceMode:     false,
   maintenanceMessage:  '',
   collectionDelivery:  true,
-  turnaroundTime:      '1-2 hours',
-  businessHours:       DEFAULT_HOURS,
 };
 
 export default function OperationsSettingsForm() {
@@ -50,8 +40,6 @@ export default function OperationsSettingsForm() {
         maintenanceMode:     s.operations.maintenanceMode    ?? false,
         maintenanceMessage:  s.operations.maintenanceMessage ?? '',
         collectionDelivery:  s.operations.collectionDelivery ?? true,
-        turnaroundTime:      s.operations.turnaroundTime     ?? '1-2 hours',
-        businessHours:       s.operations.businessHours?.length ? s.operations.businessHours : DEFAULT_HOURS,
       }))
       .catch(() => setFetchError('Failed to load settings. Check your connection.'))
       .finally(() => setLoading(false));
@@ -59,12 +47,6 @@ export default function OperationsSettingsForm() {
 
   const setToggle = (key: keyof Settings['operations']) =>
     setOps(p => ({ ...p, [key]: !p[key] }));
-
-  const setHour = (idx: number, field: keyof BusinessHour, val: string | boolean) =>
-    setOps(p => ({
-      ...p,
-      businessHours: p.businessHours.map((h, i) => i === idx ? { ...h, [field]: val } : h),
-    }));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,8 +57,6 @@ export default function OperationsSettingsForm() {
         maintenanceMode:     updated.operations.maintenanceMode    ?? false,
         maintenanceMessage:  updated.operations.maintenanceMessage ?? '',
         collectionDelivery:  updated.operations.collectionDelivery ?? true,
-        turnaroundTime:      updated.operations.turnaroundTime     ?? '1-2 hours',
-        businessHours:       updated.operations.businessHours?.length ? updated.operations.businessHours : DEFAULT_HOURS,
       });
       success('Operations settings saved');
     } catch (err: any) {
@@ -174,55 +154,6 @@ export default function OperationsSettingsForm() {
             className="w-full rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-3.5 py-2.5 text-[13px] text-[#202124] resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all"
           />
           <p className="mt-1.5 text-[11px] text-[#9aa0a6]">Shown to customers when maintenance mode is active.</p>
-        </div>
-      </div>
-
-      {/* Turnaround Time */}
-      <div className="rounded-2xl border border-[#e8eaed] overflow-hidden">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-3 border-b border-[#e8eaed]">
-          <p className="text-[12px] font-bold text-[#5f6368] uppercase tracking-widest">Repair Turnaround</p>
-        </div>
-        <div className="p-5">
-          <label className="mb-1.5 flex items-center gap-1.5 text-[12px] font-bold text-[#5f6368] uppercase tracking-wide">
-            <Timer size={11} /> Estimated Turnaround Time
-          </label>
-          <input
-            value={ops.turnaroundTime}
-            onChange={e => setOps(p => ({ ...p, turnaroundTime: e.target.value }))}
-            className={inputCls}
-            placeholder="e.g. 1-2 hours"
-          />
-          <p className="mt-1.5 text-[11px] text-[#9aa0a6]">Displayed to customers on the booking and checkout pages.</p>
-        </div>
-      </div>
-
-      {/* Business Hours */}
-      <div className="rounded-2xl border border-[#e8eaed] overflow-hidden">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-3 border-b border-[#e8eaed]">
-          <p className="text-[12px] font-bold text-[#5f6368] uppercase tracking-widest">Business Hours</p>
-        </div>
-        <div className="divide-y divide-[#f8fafc]">
-          {ops.businessHours.map((h, idx) => (
-            <div key={h.day} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5 hover:bg-[#fafbfc] transition-colors">
-              <div className="flex items-center gap-3 w-40 flex-shrink-0">
-                <div
-                  onClick={() => setHour(idx, 'open', !h.open)}
-                  className={`relative flex-shrink-0 h-6 w-11 rounded-full transition-all duration-200 cursor-pointer shadow-inner ${h.open ? 'bg-amber-500' : 'bg-gray-200'}`}>
-                  <div className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ${h.open ? 'translate-x-5' : ''}`} />
-                </div>
-                <span className={`text-[13px] font-semibold ${h.open ? 'text-[#202124]' : 'text-[#9aa0a6]'}`}>{h.day}</span>
-              </div>
-              {h.open ? (
-                <div className="flex items-center gap-2">
-                  <input type="time" value={h.from} onChange={e => setHour(idx, 'from', e.target.value)} className={timeCls} />
-                  <span className="text-[12px] font-semibold text-[#9aa0a6]">→</span>
-                  <input type="time" value={h.to}   onChange={e => setHour(idx, 'to',   e.target.value)} className={timeCls} />
-                </div>
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-[11px] font-bold text-[#9aa0a6]">Closed</span>
-              )}
-            </div>
-          ))}
         </div>
       </div>
 

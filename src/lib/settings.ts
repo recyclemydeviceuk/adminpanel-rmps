@@ -1,12 +1,5 @@
 import api from './api';
 
-export interface BusinessHour {
-  day:  string;
-  open: boolean;
-  from: string;
-  to:   string;
-}
-
 export interface Settings {
   general: {
     businessName:    string;
@@ -21,8 +14,6 @@ export interface Settings {
     maintenanceMode:     boolean;
     maintenanceMessage:  string;
     collectionDelivery:  boolean;
-    turnaroundTime:      string;
-    businessHours:       BusinessHour[];
   };
   notifications: {
     emailOnNewOrder:      boolean;
@@ -30,7 +21,6 @@ export interface Settings {
     emailOnWarrantyClaim: boolean;
     emailOnContactForm:   boolean;
     emailOnNewsletter:    boolean;
-    adminNotifyEmail:     string;
   };
 }
 
