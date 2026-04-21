@@ -147,7 +147,7 @@ export default function ModelFormPage() {
   const deviceOptions = [{ value: '', label: 'Select device type...' }, ...devices.map(d => ({ value: d.id, label: d.name }))];
   const brandOpts = [{ value: '', label: 'Select brand...' }, ...filteredBrands.map(b => ({ value: b.id, label: b.name }))];
   const seriesOpts = [{ value: '', label: 'No series (optional)' }, ...seriesOptions.map(s => ({ value: s.id, label: s.name }))];
-  const yearOptions = [{ value: '', label: '—' }, ...Array.from({ length: 10 }, (_, i) => { const y = new Date().getFullYear() - i; return { value: String(y), label: String(y) }; })];
+  const yearOptions = [{ value: '', label: '—' }, ...Array.from({ length: 2045 - 2017 + 1 }, (_, i) => { const y = 2045 - i; return { value: String(y), label: String(y) }; })];
 
   const sc = "w-full rounded-xl border border-[#e8eaed] bg-white px-4 py-3 text-[13px] text-[#202124] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all disabled:opacity-40";
   const lc = "block text-[11px] font-bold uppercase tracking-wide text-[#5f6368] mb-2";
