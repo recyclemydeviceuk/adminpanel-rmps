@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Clock, Calendar, Wrench, Truck, Timer, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Wrench, Truck, Timer, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSettings, updateOperationsSettings } from '../../../lib/settings';
 import type { Settings, BusinessHour } from '../../../lib/settings';
 import { useToast } from '../../../hooks/useToast';
@@ -21,8 +21,6 @@ interface ToggleDef {
 
 const TOGGLES: ToggleDef[] = [
   { key: 'maintenanceMode',    label: 'Maintenance Mode',      description: 'Temporarily disable the website for customers.',              icon: Wrench,   iconBg: 'bg-red-50',    iconColor: 'text-red-600',    dangerOn: true },
-  { key: 'acceptNewBookings',  label: 'Accept New Bookings',   description: 'Allow customers to book repairs online.',                      icon: Calendar, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
-  { key: 'sameDayRepairs',     label: 'Same-Day Repairs',      description: 'Show same-day availability to customers during checkout.',     icon: Clock,    iconBg: 'bg-blue-50',   iconColor: 'text-blue-600'    },
   { key: 'collectionDelivery', label: 'Collection & Delivery (Preston only)', description: 'Offer in-person collection & drop-off at checkout. Restricted to PR postcodes — customers outside Preston will be blocked from selecting it.', icon: Truck,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-600'   },
 ];
 
@@ -32,8 +30,6 @@ const inputCls = "w-full rounded-xl border border-[#e8eaed] bg-[#fafbfc] px-3.5 
 const EMPTY_OPS: Settings['operations'] = {
   maintenanceMode:     false,
   maintenanceMessage:  '',
-  acceptNewBookings:   true,
-  sameDayRepairs:      true,
   collectionDelivery:  true,
   turnaroundTime:      '1-2 hours',
   businessHours:       DEFAULT_HOURS,
@@ -53,8 +49,6 @@ export default function OperationsSettingsForm() {
       .then(s => setOps({
         maintenanceMode:     s.operations.maintenanceMode    ?? false,
         maintenanceMessage:  s.operations.maintenanceMessage ?? '',
-        acceptNewBookings:   s.operations.acceptNewBookings  ?? true,
-        sameDayRepairs:      s.operations.sameDayRepairs     ?? true,
         collectionDelivery:  s.operations.collectionDelivery ?? true,
         turnaroundTime:      s.operations.turnaroundTime     ?? '1-2 hours',
         businessHours:       s.operations.businessHours?.length ? s.operations.businessHours : DEFAULT_HOURS,
@@ -80,8 +74,6 @@ export default function OperationsSettingsForm() {
       setOps({
         maintenanceMode:     updated.operations.maintenanceMode    ?? false,
         maintenanceMessage:  updated.operations.maintenanceMessage ?? '',
-        acceptNewBookings:   updated.operations.acceptNewBookings  ?? true,
-        sameDayRepairs:      updated.operations.sameDayRepairs     ?? true,
         collectionDelivery:  updated.operations.collectionDelivery ?? true,
         turnaroundTime:      updated.operations.turnaroundTime     ?? '1-2 hours',
         businessHours:       updated.operations.businessHours?.length ? updated.operations.businessHours : DEFAULT_HOURS,

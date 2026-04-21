@@ -20,8 +20,6 @@ export interface Settings {
   operations: {
     maintenanceMode:     boolean;
     maintenanceMessage:  string;
-    acceptNewBookings:   boolean;
-    sameDayRepairs:      boolean;
     collectionDelivery:  boolean;
     turnaroundTime:      string;
     businessHours:       BusinessHour[];
