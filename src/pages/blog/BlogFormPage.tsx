@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Upload, X, CheckCircle2 } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
+import RichTextEditor from '../../components/ui/RichTextEditor';
 import { useToast } from '../../context/ToastContext';
 import { getBlog, createBlog, updateBlog, BLOG_CATEGORIES } from '../../lib/blog';
 import { uploadImage } from '../../lib/upload';
@@ -233,15 +234,14 @@ export default function BlogFormPage() {
         <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm overflow-hidden">
           <div className="border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-3.5">
             <span className="text-[13px] font-bold text-[#202124]">Content</span>
-            <span className="ml-2 text-[11px] text-[#9aa0a6]">HTML</span>
+            <span className="ml-2 text-[11px] text-[#9aa0a6]">Use the toolbar, or switch to HTML if you prefer</span>
           </div>
           <div className="p-6">
-            <textarea
-              value={content} onChange={e => setContent(e.target.value)}
-              placeholder="<p>Write your blog post content here...</p>"
-              required
-              style={{ minHeight: '300px' }}
-              className="w-full rounded-xl border border-[#e8eaed] bg-white px-4 py-3 text-[13px] text-[#202124] placeholder:text-[#c4c9d0] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-all font-mono"
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder="Write your blog post content here..."
+              minHeight={320}
             />
           </div>
         </div>
