@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { MessageSquare, Search, X, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react';
-import { getContactSubmissions } from '../../lib/forms';
+import { MessageSquare, Search, X, Phone, Mail, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { getContactSubmissions, deleteContactSubmission } from '../../lib/forms';
 import type { ContactSubmission } from '../../types/forms';
 import Pagination from '../../components/ui/Pagination';
 
@@ -27,6 +27,20 @@ export default function ContactPage() {
   const [statusFilter, setStatus]   = useState<'all' | ContactSubmission['status']>('all');
   const [page, setPage]             = useState(1);
   const [expanded, setExpanded]     = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete submission from "${name}"? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await deleteContactSubmission(id);
+      setSubs((prev) => prev.filter((r: any) => r.id !== id));
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to delete submission.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -140,7 +154,7 @@ export default function ContactPage() {
       {/* Cards list */}
       <div className="rounded-2xl border border-[#e8eaed] bg-white overflow-hidden shadow-sm">
         {/* Table header */}
-        <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_32px] gap-3 border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-2.5">
+        <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_72px] gap-3 border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-2.5">
           {['Sender', 'Contact', 'Status', 'Submitted', ''].map(h => (
             <span key={h} className="text-[11px] font-semibold uppercase tracking-wide text-[#9aa0a6]">{h}</span>
           ))}
@@ -166,7 +180,7 @@ export default function ContactPage() {
               return (
                 <div key={row.id}>
                   {/* Row */}
-                  <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_32px] gap-3 items-center px-5 py-3.5 hover:bg-[#fafbfc] transition-colors">
+                  <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_72px] gap-3 items-center px-5 py-3.5 hover:bg-[#fafbfc] transition-colors">
                     {/* Sender */}
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-white text-[12px] font-bold ${avatarColor(row.name)}`}>
@@ -191,11 +205,21 @@ export default function ContactPage() {
                     <span className="text-[11px] text-[#9aa0a6]">
                       {new Date(row.submittedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
                     </span>
-                    {/* Expand toggle */}
-                    <button onClick={() => setExpanded(isExpanded ? null : row.id)}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-[#9aa0a6] hover:bg-gray-100 hover:text-[#5f6368] transition-colors">
-                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setExpanded(isExpanded ? null : row.id)}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[#9aa0a6] hover:bg-gray-100 hover:text-[#5f6368] transition-colors">
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(row.id, row.name)}
+                        disabled={deletingId === row.id}
+                        title="Delete submission"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[#9aa0a6] hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Expanded message */}

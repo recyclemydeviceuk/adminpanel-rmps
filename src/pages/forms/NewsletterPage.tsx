@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Mail, Search, X, Download, Users, TrendingUp } from 'lucide-react';
-import { getNewsletterSubmissions } from '../../lib/forms';
+import { Mail, Search, X, Download, Users, TrendingUp, Trash2 } from 'lucide-react';
+import { getNewsletterSubmissions, deleteNewsletterSubmission } from '../../lib/forms';
 import type { NewsletterSubmission } from '../../types/forms';
 import Pagination from '../../components/ui/Pagination';
 
@@ -41,6 +41,20 @@ export default function NewsletterPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'unsubscribed'>('all');
   const [page, setPage] = useState(1);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string, email: string) => {
+    if (!confirm(`Delete subscriber "${email}"? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await deleteNewsletterSubmission(id);
+      setSubs((prev) => prev.filter((r: any) => r.id !== id));
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to delete subscriber.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -156,9 +170,9 @@ export default function NewsletterPage() {
       {/* Table */}
       <div className="rounded-2xl border border-[#e8eaed] bg-white overflow-hidden shadow-sm">
         {/* Table header */}
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3 border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-2.5">
-          {['Email Address', 'Source', 'Status', 'Subscribed'].map(h => (
-            <span key={h} className="text-[11px] font-semibold uppercase tracking-wide text-[#9aa0a6]">{h}</span>
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_60px] gap-3 border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-2.5">
+          {['Email Address', 'Source', 'Status', 'Subscribed', ''].map((h, i) => (
+            <span key={i} className="text-[11px] font-semibold uppercase tracking-wide text-[#9aa0a6]">{h}</span>
           ))}
         </div>
 
@@ -177,7 +191,7 @@ export default function NewsletterPage() {
         ) : (
           <div className="divide-y divide-[#f8fafc]">
             {paginated.map(row => (
-              <div key={row.id} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-[#fafbfc] transition-colors">
+              <div key={row.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_60px] gap-3 items-center px-5 py-3.5 hover:bg-[#fafbfc] transition-colors">
                 {/* Email */}
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-600">
@@ -198,6 +212,15 @@ export default function NewsletterPage() {
                 <span className="text-[11px] text-[#9aa0a6]">
                   {new Date(row.subscribedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
                 </span>
+                {/* Actions */}
+                <button
+                  onClick={() => handleDelete(row.id, row.email)}
+                  disabled={deletingId === row.id}
+                  title="Delete subscriber"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#9aa0a6] hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
           </div>

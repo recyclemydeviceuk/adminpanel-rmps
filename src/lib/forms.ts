@@ -40,6 +40,10 @@ export async function getNewsletterSubmissions(): Promise<NewsletterSubmission[]
   return (res.data.data ?? []).map(mapId);
 }
 
+export async function deleteNewsletterSubmission(id: string): Promise<void> {
+  await api.delete(`/forms/newsletter/${id}`);
+}
+
 /* ── Contact ──────────────────────────────────────────────────── */
 
 export async function getContactSubmissions(): Promise<ContactSubmission[]> {
@@ -52,6 +56,10 @@ export async function updateContactStatus(id: string, status: string): Promise<C
   return mapId(res.data.data);
 }
 
+export async function deleteContactSubmission(id: string): Promise<void> {
+  await api.delete(`/forms/contact/${id}`);
+}
+
 /* ── Warranty ─────────────────────────────────────────────────── */
 
 export async function getWarrantySubmissions(): Promise<WarrantySubmission[]> {
@@ -62,4 +70,8 @@ export async function getWarrantySubmissions(): Promise<WarrantySubmission[]> {
 export async function updateWarrantyStatus(id: string, status: string): Promise<WarrantySubmission> {
   const res = await api.patch<{ data: any }>(`/forms/warranty/${id}/status`, { status });
   return mapId(res.data.data);
+}
+
+export async function deleteWarrantySubmission(id: string): Promise<void> {
+  await api.delete(`/forms/warranty/${id}`);
 }
