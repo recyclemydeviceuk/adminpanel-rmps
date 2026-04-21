@@ -63,7 +63,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
       <div className="flex items-center gap-2">
         {/* Visit main site */}
         <a
-          href="/"
+          href="https://repairmyphonescreen.co.uk"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden md:flex items-center gap-1.5 rounded-xl border border-[#e8eaed] bg-white px-3 py-2 text-[12px] font-medium text-[#5f6368] hover:bg-gray-50 hover:text-[#202124] transition-colors duration-150"
