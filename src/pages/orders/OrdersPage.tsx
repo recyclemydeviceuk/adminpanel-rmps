@@ -327,7 +327,7 @@ export default function OrdersPage() {
             <div>
               <p className="text-[11px] font-bold text-[#9aa0a6] uppercase tracking-wide mb-3">Order Status</p>
               <div className="flex flex-wrap gap-2">
-                {[{ value: '', label: 'All', icon: null }, ...STATUS_OPTS.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1), icon: null }))].map(opt => {
+                {[{ value: '', label: 'All', icon: null }, ...ADMIN_STATUS_OPTS.map((s: OrderStatus) => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1), icon: null }))].map(opt => {
                   const isSelected = statusFilter === opt.value;
                   const cfg = STATUS_STAT_CONFIG.find(c => c.key === opt.value);
                   return (
