@@ -23,9 +23,12 @@ export default function BrandFormPage() {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [showcaseImageUrl, setShowcaseImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
   const logoRef = useRef<HTMLInputElement>(null);
+  const showcaseRef = useRef<HTMLInputElement>(null);
   const [logoDragOver, setLogoDragOver] = useState(false);
+  const [showcaseDragOver, setShowcaseDragOver] = useState(false);
 
   useEffect(() => {
     if (!brandId) return;
@@ -33,7 +36,9 @@ export default function BrandFormPage() {
     getBrandById(brandId).then(brand => {
       if (brand) {
         setDeviceTypeId(brand.deviceTypeId); setName(brand.name); setSlug(brand.slug);
-        setLogoUrl(brand.logoUrl ?? ''); setIsActive(brand.isActive);
+        setLogoUrl(brand.logoUrl ?? '');
+        setShowcaseImageUrl(brand.showcaseImageUrl ?? '');
+        setIsActive(brand.isActive);
       }
     }).finally(() => setLoading(false));
   }, [brandId]);
@@ -52,7 +57,9 @@ export default function BrandFormPage() {
       const data = {
         deviceTypeId, deviceTypeName: dt?.name ?? '',
         name: name.trim(), slug: slug.trim(),
-        logoUrl: logoUrl.trim(), isActive,
+        logoUrl: logoUrl.trim(),
+        showcaseImageUrl: showcaseImageUrl.trim(),
+        isActive,
       };
       if (isEdit && brandId) {
         await updateBrand(brandId, data);
@@ -182,13 +189,19 @@ export default function BrandFormPage() {
         {/* Images */}
         <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm overflow-hidden">
           <div className="border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-3.5">
-            <span className="text-[13px] font-bold text-[#202124]">Brand Logo</span>
+            <span className="text-[13px] font-bold text-[#202124]">Brand Images</span>
             <span className="ml-2 text-[11px] text-[#9aa0a6]">Optional</span>
           </div>
-          <div className="p-6 max-w-xs">
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <UploadZone label="Logo Image" preview={logoUrl} inputRef={logoRef}
               onFile={f => readFile(f, setLogoUrl)} dragOver={logoDragOver}
               setDragOver={setLogoDragOver} onClear={() => setLogoUrl('')} />
+            <UploadZone label="Showcase Image (Thumbnail)" preview={showcaseImageUrl} inputRef={showcaseRef}
+              onFile={f => readFile(f, setShowcaseImageUrl)} dragOver={showcaseDragOver}
+              setDragOver={setShowcaseDragOver} onClear={() => setShowcaseImageUrl('')} />
+          </div>
+          <div className="px-6 pb-5 -mt-2">
+            <p className="text-[10px] text-[#9aa0a6]">Showcase image is the large phone thumbnail shown on the "Choose brand" page.</p>
           </div>
         </div>
 
