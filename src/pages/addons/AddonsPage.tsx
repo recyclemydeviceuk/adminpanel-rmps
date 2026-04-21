@@ -91,9 +91,15 @@ export default function AddonsPage() {
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100">
-                      <Package size={16} className="text-pink-500" />
-                    </div>
+                    {addon.imageUrl ? (
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#f5f7fb] overflow-hidden">
+                        <img src={addon.imageUrl} alt={addon.name} className="h-9 w-9 object-contain" />
+                      </div>
+                    ) : (
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100">
+                        <Package size={16} className="text-pink-500" />
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <h3 className="text-[14px] font-bold text-[#202124] leading-tight">{addon.name}</h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
