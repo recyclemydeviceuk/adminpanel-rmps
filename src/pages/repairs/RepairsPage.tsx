@@ -100,9 +100,19 @@ export default function RepairsPage() {
                 <div className="p-5">
                   {/* Header */}
                   <div className="flex items-start gap-3 mb-4">
-                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${cfg.bg}`}>
-                      <Icon size={18} className={cfg.color} />
-                    </div>
+                    {rt.imageUrl ? (
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#f5f7fb] overflow-hidden">
+                        <img
+                          src={rt.imageUrl}
+                          alt={rt.name}
+                          className="h-9 w-9 object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${cfg.bg}`}>
+                        <Icon size={18} className={cfg.color} />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="text-[15px] font-bold text-[#202124] leading-tight">{rt.name}</h3>
