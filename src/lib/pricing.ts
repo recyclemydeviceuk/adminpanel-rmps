@@ -37,6 +37,53 @@ export async function deletePricingRule(id: string): Promise<void> {
   await api.delete(`/pricing/${id}`);
 }
 
+/**
+ * Upsert a full list of repair-type prices for a single device model.
+ *
+ * For each row:
+ *   - if a PricingRule already exists for (modelId, repairTypeId) → update it
+ *   - otherwise, if the price is > 0 → create a new rule
+ *   - if the price is empty/0 and no rule exists → skip (nothing to delete)
+ *
+ * Works for both the "Edit Model" and "Create Model" flows — the caller
+ * passes the modelId (new or existing) after the DeviceModel has been saved.
+ */
+export async function saveModelPricing(
+  modelId:   string,
+  modelName: string,
+  brandName: string,
+  rows: {
+    repairTypeId:   string;
+    repairTypeName: string;
+    category:       string;
+    price:          number;
+    isActive:       boolean;
+  }[],
+  existing: PricingRule[],
+): Promise<void> {
+  for (const row of rows) {
+    const match = existing.find(p => p.repairTypeId === row.repairTypeId);
+    if (match) {
+      // Update even if price didn't change — the isActive toggle may have.
+      await updatePricingRule(match.id, {
+        price:    row.price,
+        isActive: row.isActive,
+      });
+    } else if (row.price > 0) {
+      await createPricingRule({
+        modelId,
+        modelName,
+        brandName,
+        repairTypeId:   row.repairTypeId,
+        repairTypeName: row.repairTypeName,
+        category:       row.category as PricingRule['category'],
+        price:          row.price,
+        isActive:       row.isActive,
+      });
+    }
+  }
+}
+
 /* ── Repair Types ────────────────────────────────────────────── */
 
 export async function getRepairTypes(): Promise<RepairType[]> {

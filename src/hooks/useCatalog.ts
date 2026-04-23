@@ -141,30 +141,7 @@ export function useModelPricing(modelId: string) {
       .finally(() => setLoading(false));
   }, [modelId]);
 
-  const save = useCallback(async (rules: { repairTypeId: string; repairTypeName: string; category: string; price: number; originalPrice?: number; isActive: boolean }[], modelName: string, brandName: string) => {
-    for (const rule of rules) {
-      const existing = pricing.find(p => p.repairTypeId === rule.repairTypeId);
-      if (existing) {
-        await pricingLib.updatePricingRule(existing.id, { price: rule.price, originalPrice: rule.originalPrice, isActive: rule.isActive });
-      } else if (rule.price > 0) {
-        await pricingLib.createPricingRule({
-          modelId,
-          modelName,
-          brandName,
-          repairTypeId: rule.repairTypeId,
-          repairTypeName: rule.repairTypeName,
-          category: rule.category as PricingRule['category'],
-          price: rule.price,
-          originalPrice: rule.originalPrice,
-          isActive: rule.isActive,
-        });
-      }
-    }
-    const refreshed = await pricingLib.getPricingByModel(modelId);
-    setPricing(refreshed);
-  }, [modelId, pricing]);
-
-  return { pricing, loading, save };
+  return { pricing, loading };
 }
 
 /* ── Legacy re-exports (backward compat) ───────────────────── */

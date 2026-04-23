@@ -70,7 +70,6 @@ export default function PricingPage() {
       render: row => (
         <div className="text-right">
           <span className="font-bold text-[#202124]">{formatCurrency(row.price)}</span>
-          {row.originalPrice && <span className="ml-2 text-[11px] text-[#9aa0a6] line-through">{formatCurrency(row.originalPrice)}</span>}
         </div>
       ),
     },

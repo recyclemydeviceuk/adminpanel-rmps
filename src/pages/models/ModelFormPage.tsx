@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Cpu, Upload, X, CheckCircle2, PoundSterling } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
-import ModelPricingSection from './components/ModelPricingSection';
+import ModelPricingSection, { type PricingRow } from './components/ModelPricingSection';
 import { useDevices } from '../../hooks/useDevices';
 import { useBrands, useModelPricing } from '../../hooks/useCatalog';
 import { getModelById, createModel, updateModel, getSeriesByBrand } from '../../lib/catalog';
 import { uploadImage } from '../../lib/upload';
-import { getRepairTypes } from '../../lib/pricing';
+import { getRepairTypes, saveModelPricing } from '../../lib/pricing';
 import { useToast } from '../../context/ToastContext';
 import type { Series } from '../../types/catalog';
 import type { RepairType } from '../../types/pricing';
@@ -43,9 +43,14 @@ export default function ModelFormPage() {
   const [seriesOptions, setSeriesOptions] = useState<Series[]>([]);
   const [repairTypes, setRepairTypes] = useState<RepairType[]>([]);
 
-  // Pricing
-  const { pricing: existingPricing, loading: pricingLoading, save: savePricing } = useModelPricing(modelId ?? '');
-  const [pricingRows, setPricingRows] = useState<{ repairTypeId: string; repairTypeName: string; category: string; price: string; originalPrice: string; isActive: boolean }[]>([]);
+  // Pricing — loaded from DB only in Edit mode; empty in Create mode
+  const { pricing: existingPricing, loading: pricingLoading } = useModelPricing(modelId ?? '');
+  const [pricingRows, setPricingRows] = useState<PricingRow[]>([]);
+  // Stable onChange — prevents ModelPricingSection's effect from re-firing
+  // just because the parent re-rendered with a new callback identity.
+  const handlePricingChange = useCallback((rows: PricingRow[]) => {
+    setPricingRows(rows);
+  }, []);
 
   useEffect(() => { getRepairTypes().then(setRepairTypes); }, []);
 
@@ -119,19 +124,31 @@ export default function ModelFormPage() {
         releaseYear: releaseYear ? parseInt(releaseYear) : undefined,
       };
 
+      // Build the validated pricing payload once — reused for both flows.
+      const validRows = pricingRows
+        .filter(r => r.price && parseFloat(r.price) > 0)
+        .map(r => ({
+          repairTypeId:   r.repairTypeId,
+          repairTypeName: r.repairTypeName,
+          category:       r.category,
+          price:          parseFloat(r.price),
+          isActive:       r.isActive,
+        }));
+
       if (isEdit && modelId) {
         await updateModel(modelId, data);
-        // Save pricing
-        if (pricingRows.length > 0) {
-          const validRows = pricingRows.filter(r => r.price && parseFloat(r.price) > 0).map(r => ({
-            repairTypeId: r.repairTypeId, repairTypeName: r.repairTypeName, category: r.category,
-            price: parseFloat(r.price), originalPrice: r.originalPrice ? parseFloat(r.originalPrice) : undefined, isActive: r.isActive,
-          }));
-          if (validRows.length > 0) await savePricing(validRows, name.trim(), brand?.name ?? '');
+        if (validRows.length > 0) {
+          await saveModelPricing(modelId, name.trim(), brand?.name ?? '', validRows, existingPricing);
         }
         success('Model updated');
       } else {
-        await createModel(data);
+        // CREATE: save the DeviceModel first, then attach any pricing rows
+        // to the newly-minted id. No existing rules, so every valid row is
+        // treated as a create.
+        const created = await createModel(data);
+        if (validRows.length > 0) {
+          await saveModelPricing(created.id, name.trim(), brand?.name ?? '', validRows, []);
+        }
         success('Model created');
       }
       navigate('/models');
@@ -292,23 +309,27 @@ export default function ModelFormPage() {
           </div>
         </div>
 
-        {/* Repair Pricing — edit mode only */}
-        {isEdit && (
-          <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-3.5 flex items-center gap-2">
-              <PoundSterling size={13} className="text-emerald-600" />
-              <span className="text-[13px] font-bold text-[#202124]">Repair Pricing</span>
-              <span className="ml-auto text-[11px] text-[#9aa0a6]">Set price per repair type</span>
-            </div>
-            <div className="p-6">
-              {pricingLoading ? (
-                <div className="flex justify-center py-8"><Spinner /></div>
-              ) : (
-                <ModelPricingSection repairTypes={repairTypes} existingPricing={existingPricing} onChange={setPricingRows} />
-              )}
-            </div>
+        {/* Repair Pricing — available for BOTH Create and Edit.
+            On create we save the model first and then attach pricing to the
+            returned id, so the admin can set prices in one step. */}
+        <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm overflow-hidden">
+          <div className="border-b border-[#f1f3f4] bg-[#f8fafc] px-5 py-3.5 flex items-center gap-2">
+            <PoundSterling size={13} className="text-emerald-600" />
+            <span className="text-[13px] font-bold text-[#202124]">Repair Pricing</span>
+            <span className="ml-auto text-[11px] text-[#9aa0a6]">Set price per repair type</span>
           </div>
-        )}
+          <div className="p-6">
+            {isEdit && pricingLoading ? (
+              <div className="flex justify-center py-8"><Spinner /></div>
+            ) : (
+              <ModelPricingSection
+                repairTypes={repairTypes}
+                existingPricing={existingPricing}
+                onChange={handlePricingChange}
+              />
+            )}
+          </div>
+        </div>
 
         {/* Active Status */}
         <div className="rounded-2xl border border-[#e8eaed] bg-white shadow-sm px-5 py-4">

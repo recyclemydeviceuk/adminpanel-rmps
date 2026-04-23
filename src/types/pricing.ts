@@ -34,7 +34,6 @@ export interface PricingRule {
   repairTypeName: string;
   category: RepairCategory;
   price: number;
-  originalPrice?: number;
   isActive: boolean;
   updatedAt: string;
 }

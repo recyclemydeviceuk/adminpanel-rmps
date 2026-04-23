@@ -26,7 +26,6 @@ export default function PricingFormPage() {
   const [modelId, setModelId] = useState('');
   const [repairTypeId, setRepairTypeId] = useState('');
   const [price, setPrice] = useState('');
-  const [originalPrice, setOriginalPrice] = useState('');
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
@@ -36,7 +35,7 @@ export default function PricingFormPage() {
         getPricingRuleById(ruleId).then(rule => {
           if (rule) {
             setModelId(rule.modelId); setRepairTypeId(rule.repairTypeId);
-            setPrice(String(rule.price)); setOriginalPrice(String(rule.originalPrice ?? ''));
+            setPrice(String(rule.price));
             setIsActive(rule.isActive);
           }
         });
@@ -56,7 +55,6 @@ export default function PricingFormPage() {
         modelId, modelName: model.name, brandName: model.brandName,
         repairTypeId, repairTypeName: rt.name, category: rt.category,
         price: parseFloat(price),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
         isActive,
       };
       if (isEdit && ruleId) {
@@ -98,10 +96,9 @@ export default function PricingFormPage() {
         </Card>
 
         <Card padding="lg" className="mb-5">
-          <CardHeader title="Pricing" subtitle="Set the current and original prices" />
+          <CardHeader title="Pricing" subtitle="This is the price shown to customers on the repair booking page" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Input label="Price (£)" type="number" step="0.01" min="0" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" required />
-            <Input label="Original Price (£)" type="number" step="0.01" min="0" value={originalPrice} onChange={e => setOriginalPrice(e.target.value)} placeholder="Optional — shown crossed out" />
           </div>
         </Card>
 

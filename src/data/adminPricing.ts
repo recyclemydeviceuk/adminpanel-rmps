@@ -16,7 +16,7 @@ export const ADMIN_PRICING: PricingRule[] = [
   { id: 'pr-003', modelId: 'model-001', modelName: 'iPhone 15 Pro', brandName: 'Apple', repairTypeId: 'rt-003', repairTypeName: 'Camera', category: 'camera', price: 129.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
   { id: 'pr-004', modelId: 'model-001', modelName: 'iPhone 15 Pro', brandName: 'Apple', repairTypeId: 'rt-004', repairTypeName: 'Back Cover', category: 'back_glass', price: 99.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
   // Apple iPhone 14
-  { id: 'pr-005', modelId: 'model-002', modelName: 'iPhone 14', brandName: 'Apple', repairTypeId: 'rt-001', repairTypeName: 'Front Screen', category: 'screen', price: 119.99, originalPrice: 139.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
+  { id: 'pr-005', modelId: 'model-002', modelName: 'iPhone 14', brandName: 'Apple', repairTypeId: 'rt-001', repairTypeName: 'Front Screen', category: 'screen', price: 119.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
   { id: 'pr-006', modelId: 'model-002', modelName: 'iPhone 14', brandName: 'Apple', repairTypeId: 'rt-002', repairTypeName: 'Battery & Charging', category: 'battery', price: 69.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
   { id: 'pr-007', modelId: 'model-002', modelName: 'iPhone 14', brandName: 'Apple', repairTypeId: 'rt-003', repairTypeName: 'Camera', category: 'camera', price: 109.99, isActive: true, updatedAt: '2024-01-01T00:00:00Z' },
   // Apple iPhone 13
