@@ -13,7 +13,6 @@ export interface Settings {
   operations: {
     maintenanceMode:     boolean;
     maintenanceMessage:  string;
-    collectionDelivery:  boolean;
   };
   notifications: {
     emailOnNewOrder:      boolean;

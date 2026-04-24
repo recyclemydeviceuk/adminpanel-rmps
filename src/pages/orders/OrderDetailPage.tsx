@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Package, CreditCard, Calendar, Clock, CheckCircle2, RefreshCw, Printer, StickyNote, Send, ArrowLeft, User, Mail, Phone, Wrench, PoundSterling, AlertTriangle, RotateCcw, ChevronDown, Lock, ShieldCheck, Truck, Home, Box, MapPin } from 'lucide-react';
+import { Package, CreditCard, Calendar, Clock, CheckCircle2, RefreshCw, Printer, StickyNote, Send, ArrowLeft, User, Mail, Phone, Wrench, PoundSterling, AlertTriangle, RotateCcw, ChevronDown, Lock, ShieldCheck, Truck, Home, Box } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
 import { useOrder } from '../../hooks/useOrders';
 import { useToast } from '../../hooks/useToast';
@@ -448,9 +448,9 @@ export default function OrderDetailPage() {
           {/* Postage */}
           {order.postageType && (() => {
             const META: Record<string, { label: string; description: string; icon: any; tint: string }> = {
-              'print-label': { label: 'Print Our Label',      description: 'Customer prints a prepaid label at home.',              icon: Printer, tint: 'text-blue-600 bg-blue-50' },
-              'send-pack':   { label: 'Send a Pack From Us',  description: 'We post a prepaid packaging kit to the customer.',     icon: Box,     tint: 'text-indigo-600 bg-indigo-50' },
-              'collection':  { label: 'Collection & Delivery',description: 'We collect from the customer and deliver back.',       icon: Home,    tint: 'text-red-600 bg-red-50' },
+              'print-label':   { label: 'Print Our Label',     description: 'Customer prints a prepaid label at home.',              icon: Printer, tint: 'text-blue-600 bg-blue-50' },
+              'send-pack':     { label: 'Send a Pack From Us', description: 'We post a prepaid packaging kit to the customer.',     icon: Box,     tint: 'text-indigo-600 bg-indigo-50' },
+              'send-your-own': { label: 'Send Your Own',       description: 'Customer posts the device using their own courier.',   icon: Home,    tint: 'text-emerald-600 bg-emerald-50' },
             };
             const m = META[order.postageType] ?? { label: order.postageType, description: '', icon: Truck, tint: 'text-gray-600 bg-gray-50' };
             const Icon = m.icon;
@@ -470,18 +470,6 @@ export default function OrderDetailPage() {
                       <p className="text-[11px] text-[#9aa0a6] mt-0.5">{m.description}</p>
                     </div>
                   </div>
-                  {order.postageType === 'collection' && (order.collectionAddress || order.collectionPostcode) && (
-                    <div className="rounded-xl border border-[#fde4e4] bg-red-50/40 p-3">
-                      <div className="flex items-start gap-2">
-                        <MapPin size={12} className="mt-0.5 flex-shrink-0 text-red-500" />
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-red-700 mb-0.5">Collection address</p>
-                          {order.collectionAddress && <p className="text-[12px] text-[#202124] leading-snug">{order.collectionAddress}</p>}
-                          {order.collectionPostcode && <p className="text-[12px] font-mono font-semibold text-[#5f6368] mt-0.5">{order.collectionPostcode}</p>}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             );

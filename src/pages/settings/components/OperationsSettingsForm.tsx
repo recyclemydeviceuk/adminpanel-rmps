@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Wrench, Truck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Wrench, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSettings, updateOperationsSettings } from '../../../lib/settings';
 import type { Settings } from '../../../lib/settings';
 import { useToast } from '../../../hooks/useToast';
@@ -16,13 +16,11 @@ interface ToggleDef {
 
 const TOGGLES: ToggleDef[] = [
   { key: 'maintenanceMode',    label: 'Maintenance Mode',      description: 'Temporarily disable the website for customers.',              icon: Wrench,   iconBg: 'bg-red-50',    iconColor: 'text-red-600',    dangerOn: true },
-  { key: 'collectionDelivery', label: 'Collection & Delivery (Preston only)', description: 'Offer in-person collection & drop-off at checkout. Restricted to PR postcodes — customers outside Preston will be blocked from selecting it.', icon: Truck,    iconBg: 'bg-amber-50',  iconColor: 'text-amber-600'   },
 ];
 
 const EMPTY_OPS: Settings['operations'] = {
   maintenanceMode:     false,
   maintenanceMessage:  '',
-  collectionDelivery:  true,
 };
 
 export default function OperationsSettingsForm() {
@@ -39,7 +37,6 @@ export default function OperationsSettingsForm() {
       .then(s => setOps({
         maintenanceMode:     s.operations.maintenanceMode    ?? false,
         maintenanceMessage:  s.operations.maintenanceMessage ?? '',
-        collectionDelivery:  s.operations.collectionDelivery ?? true,
       }))
       .catch(() => setFetchError('Failed to load settings. Check your connection.'))
       .finally(() => setLoading(false));
@@ -56,7 +53,6 @@ export default function OperationsSettingsForm() {
       setOps({
         maintenanceMode:     updated.operations.maintenanceMode    ?? false,
         maintenanceMessage:  updated.operations.maintenanceMessage ?? '',
-        collectionDelivery:  updated.operations.collectionDelivery ?? true,
       });
       success('Operations settings saved');
     } catch (err: any) {

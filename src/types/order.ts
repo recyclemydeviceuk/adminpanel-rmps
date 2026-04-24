@@ -11,7 +11,7 @@ export type PaymentMethod = 'paypal';
 
 export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
 
-export type PostageType = 'print-label' | 'send-pack' | 'collection';
+export type PostageType = 'print-label' | 'send-pack' | 'send-your-own';
 
 export interface OrderItem {
   id: string;
@@ -43,8 +43,6 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   postageType?: PostageType;
-  collectionAddress?: string;
-  collectionPostcode?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
