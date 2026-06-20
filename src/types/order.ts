@@ -23,6 +23,15 @@ export interface OrderItem {
   totalPrice: number;
 }
 
+export interface ShippingAddress {
+  line1: string;
+  line2?: string;
+  city: string;
+  county?: string;
+  postcode: string;
+  country?: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -43,6 +52,7 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   postageType?: PostageType;
+  shippingAddress?: ShippingAddress;
   notes?: string;
   createdAt: string;
   updatedAt: string;

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Package, CreditCard, Calendar, Clock, CheckCircle2, RefreshCw, Printer, StickyNote, Send, ArrowLeft, User, Mail, Phone, Wrench, PoundSterling, AlertTriangle, RotateCcw, ChevronDown, Lock, ShieldCheck, Truck, Home, Box } from 'lucide-react';
+import { Package, CreditCard, Calendar, Clock, CheckCircle2, RefreshCw, Printer, StickyNote, Send, ArrowLeft, User, Mail, Phone, Wrench, PoundSterling, AlertTriangle, RotateCcw, ChevronDown, Lock, ShieldCheck, Truck, Home, Box, MapPin } from 'lucide-react';
 import Spinner from '../../components/ui/Spinner';
 import { useOrder } from '../../hooks/useOrders';
 import { useToast } from '../../hooks/useToast';
@@ -99,6 +99,14 @@ export default function OrderDetailPage() {
       </head><body>
       <h1>Invoice — ${order.orderNumber}</h1>
       <p>Customer: <strong>${order.customerName}</strong> · ${order.customerEmail}</p>
+      ${order.shippingAddress && order.shippingAddress.line1 ? `<p>Address: ${[
+        order.shippingAddress.line1,
+        order.shippingAddress.line2,
+        order.shippingAddress.city,
+        order.shippingAddress.county,
+        order.shippingAddress.postcode,
+        order.shippingAddress.country,
+      ].filter(Boolean).join(', ')}</p>` : ''}
       <p>Device: <strong>${order.device}</strong> · Repair: ${order.repairType}</p>
       <table><thead><tr><th>Service</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
       <tbody>${order.items.map(i=>`<tr><td>${i.repairType}</td><td>${i.quantity}</td><td>£${i.unitPrice.toFixed(2)}</td><td>£${i.totalPrice.toFixed(2)}</td></tr>`).join('')}</tbody>
@@ -386,6 +394,22 @@ export default function OrderDetailPage() {
                 </div>
                 <span className="font-medium font-mono">{order.customerPhone}</span>
               </a>
+
+              {/* Shipping / contact address */}
+              {order.shippingAddress && order.shippingAddress.line1 && (
+                <div className="flex items-start gap-3 rounded-xl bg-gray-50 px-3 py-2.5 text-[12px] text-[#5f6368]">
+                  <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg border border-[#e8eaed] bg-white">
+                    <MapPin size={11} className="text-[#9aa0a6]" />
+                  </div>
+                  <div className="leading-relaxed">
+                    <p className="font-bold text-[#202124]">{order.shippingAddress.line1}</p>
+                    {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
+                    <p>{order.shippingAddress.city}{order.shippingAddress.county ? `, ${order.shippingAddress.county}` : ''}</p>
+                    <p className="font-mono">{order.shippingAddress.postcode}</p>
+                    {order.shippingAddress.country && <p>{order.shippingAddress.country}</p>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
